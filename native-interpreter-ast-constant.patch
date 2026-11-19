@@ -1,0 +1,22 @@
+cloudscraper's native interpreter: evaluate number literals from ast.Constant
+
+ast.NodeVisitor no longer routes Constant nodes to the deprecated visit_Num
+compatibility shim, so Calc has no handler for a number literal, generic_visit
+returns None for it, and every expression the Cloudflare challenge asks the
+native interpreter to evaluate fails as "unsupported operand type(s) for *:
+'NoneType' and 'NoneType'".
+
+--- a/cloudscraper/interpreters/native.py
++++ b/cloudscraper/interpreters/native.py
+@@ -33,6 +33,11 @@ class Calc(ast.NodeVisitor):
+ 
+     # ------------------------------------------------------------------------------- #
+ 
++    def visit_Constant(self, node):
++        return node.value
++
++    # ------------------------------------------------------------------------------- #
++
+     def visit_Expr(self, node):
+         return self.visit(node.value)
+ 
